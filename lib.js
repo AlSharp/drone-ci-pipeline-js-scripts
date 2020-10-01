@@ -1,4 +1,4 @@
-const fs = require('fs');
+const {exec} = require('child_process');
 
 module.exports = {
   getArgument: (argv, number) => {
@@ -6,32 +6,35 @@ module.exports = {
       .slice(2)
       .map(arg => arg.split('=')[1])[number - 1]
   },
-  readJSON: filePath => {
-    return new Promise((resolve, reject) => {
-      fs.readFile(filePath, {encoding: 'utf-8'}, (error, data) => {
-        if (error) {
-          return reject(error);
-        }
-        const json = JSON.parse(data);
-        return resolve(json);
-      })
-    })
-  },
-  writeJSON: (filePath, json) => {
-    return new Promise((resolve, reject) => {
-      fs.writeFile(filePath, JSON.stringify(json), error => {
-        if (error) {
-          return reject(error);
-        }
-        return resolve(filePath);
-      })
-    })
-  },
   convertVersionToNumber: str => {
     if (!str) {
       return 0;
     }
     return parseInt(str.replace(/\./g, ''), 10);
+  },
+  zipFolder: (outputPath, folderPath) => {
+    return new Promise((resolve, reject) => {
+      exec(`cd ${folderPath} && zip -9 -y -r ${outputPath} ./`, (error, stdout, stderr) => {
+        if (error) {
+          return reject(error);
+        }
+        console.log('stdout: ', stdout);
+        console.log('stderr: ', stderr);
+        return resolve();
+      })
+    })
+  },
+  unzipToFolder: (zipFilePath, folderPath) => {
+    return new Promise((resolve, reject) => {
+      exec(`unzip ${zipFilePath} -d ${folderPath}`, (error, stdout, stderr) => {
+        if (error) {
+          return reject(error);
+        }
+        console.log('stdout: ', stdout);
+        console.log('stderr: ', stderr);
+        return resolve();
+      })
+    })
   }
 }
 

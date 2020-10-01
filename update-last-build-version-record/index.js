@@ -1,8 +1,11 @@
+const fse = require('fs-extra');
+const {valuesJSON: filePathToValuesJson} = require('../paths');
+
 async function main() {
   try {
-    const filePathToValuesJson = '/home/pi/share/drone-service/values.json';
-    const {version} = await readJSON(filePathToValuesJson);
-    await writeJSON(filePathToValuesJson, {...valuesJSON, lastVersion: version});
+    const json = await fse.readJSON(filePathToValuesJson);
+    const version = json.version;
+    await fse.writeJSON(filePathToValuesJson, {...json, lastVersion: version});
     console.log('update last build version record is completed');
   }
   catch(error) {
